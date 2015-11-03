@@ -129,4 +129,22 @@ f2 = theano.function([x0, i, step], results2)
 print f([1],10,2)
 print f2([1],10,2)
 
+## scan taps in sequence iteration
+outputs = T.as_tensor_variable(np.asarray(0))
+def recurrence_lstm(m_, h_, c_):
+    print m_.eval
+    print h_.eval
+    print c_.eval
+    h = m_ + h_
+    c = m_ + c_
+    return h, c
+
+m = T.lvector('m')
+a = T.as_tensor_variable(np.asarray(0))
+b = T.as_tensor_variable(np.asarray(1))
+
+rval, updates = theano.scan(fn=recurrence_lstm, sequences=dict(input=m, taps=[0]), outputs_info=[a, b], n_steps=5)
+sf6 = theano.function(inputs=[m], outputs=rval, updates=updates)
+print sf6([0,1,2,3,4])
+
 
