@@ -72,10 +72,10 @@ print sf5([1,2,3,4,5])
 
 outputs = T.as_tensor_variable(np.asarray(0))
 def recurrence_lstm(m_, x_, h_, c_):
-    #print m_.eval
-    #print x_.eval
-    #print h_.eval
-    #print c_.eval
+    print m_.eval
+    print x_.eval
+    print h_.eval
+    print c_.eval
     h = m_ + h_
     c = x_ + c_
     return h, c
@@ -105,5 +105,28 @@ f = theano.function([max_value], values)
 #print _
 
 print f(45)
+
+## scan taps in outputs_info loop
+def addf(a1, a2):
+    print a1.eval
+    print a2.eval
+    
+    return a1+a2
+
+i = T.iscalar('i')
+x0 = T.ivector('x0')
+step = T.iscalar('step')
+
+# 常に入力はx0である。
+# taps -n は入力に x0[t-n]を利用する
+results, updates = theano.scan(fn=addf, outputs_info=[{'initial':x0, 'taps':[-3]}], non_sequences=step, n_steps=i)
+# この記述でもLoopの場合はx0[t-1]が使われる、Iterationの場合はx0[t]が使われる、つまりtapsは[0]がデフォルトなので注意
+results2, _ = theano.scan(fn=addf, outputs_info=x0, non_sequences=step, n_steps=i)
+
+f = theano.function([x0, i, step], results)
+f2 = theano.function([x0, i, step], results2)
+
+print f([1],10,2)
+print f2([1],10,2)
 
 
